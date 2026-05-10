@@ -1,0 +1,25 @@
+{
+  "name": "html-tutor-its",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "homepage": "https://mbart.github.io/CISC499-ITS/",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1",
+    "build": "tsc && vite build",
+    "preview": "vite preview --host 127.0.0.1",
+    "deploy": "vite build && gh-pages -d dist"
+  },
+  "dependencies": {
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^5.0.4",
+    "gh-pages": "^6.3.0",
+    "typescript": "^5.9.3",
+    "vite": "^7.1.12"
+  }
+}
