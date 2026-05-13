@@ -581,6 +581,22 @@ function App() {
     setScreen("skillTree");
   };
 
+  const restartTutor = () => {
+    setCompleted(new Set());
+    setActiveLessonId(lessons[0].id);
+    setActiveTierId(1);
+    setPlacedTierId(1);
+    setConfidence(defaultConfidence);
+    setPlacementAnswers({});
+    setPlacementResult("");
+    setProjectCode({
+      1: tiers[0].starterCode,
+      2: tiers[1].starterCode,
+      3: tiers[2].starterCode
+    });
+    setScreen("welcome");
+  };
+
   return (
     <div className="app-shell">
       <header className="topbar">
@@ -628,7 +644,7 @@ function App() {
       )}
 
       {screen === "skillTree" && (
-        <SkillTreeScreen sequence={sequence} completed={completed} onOpen={openNode} />
+        <SkillTreeScreen sequence={sequence} completed={completed} onOpen={openNode} onRestart={restartTutor} />
       )}
 
       {screen === "lesson" && (
@@ -801,11 +817,13 @@ function PlacementSummaryScreen({
 function SkillTreeScreen({
   sequence,
   completed,
-  onOpen
+  onOpen,
+  onRestart
 }: {
   sequence: SequenceNode[];
   completed: Set<string>;
   onOpen: (node: SequenceNode) => void;
+  onRestart: () => void;
 }) {
   const completedCount = sequence.filter((node) => completed.has(node.id)).length;
   const progressPercent = Math.round((completedCount / sequence.length) * 100);
@@ -833,6 +851,7 @@ function SkillTreeScreen({
             <span key={lesson.id} className="lesson-chip">Lesson {index + 1}</span>
           ))}
         </div>
+        <button className="restart-action" onClick={onRestart}>Restart</button>
       </section>
       <section className="skill-tree" aria-label="Lesson progression">
         {sequence.map((node, index) => {

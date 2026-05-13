@@ -562,6 +562,18 @@ h2 {
   color: #0f57c8;
 }
 
+.restart-action {
+  align-self: flex-start;
+  margin-top: auto;
+  border: 1px solid rgba(255, 255, 255, 0.72);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.92);
+  color: #0f57c8;
+  font-weight: 900;
+  padding: 10px 14px;
+  box-shadow: 0 10px 24px rgba(8, 51, 126, 0.18);
+}
+
 .kc-chip.procedural {
   background: #e8f1ff;
   color: #175bc2;
