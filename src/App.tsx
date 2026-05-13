@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 
-type Screen = "placement" | "skillTree" | "lesson" | "quiz" | "project";
+type Screen = "welcome" | "placement" | "placementSummary" | "skillTree" | "lesson" | "quiz" | "project";
 type QuizKind = "multiple" | "prediction" | "fill";
 
 type KnowledgeComponent = {
@@ -482,22 +482,23 @@ const placementQuestions = kcs.map((kc, index) => ({
 }));
 
 const defaultConfidence = {
-  fundamentals: 45,
-  syntax: 35,
-  reading: 25
+  fundamentals: 2,
+  syntax: 1,
+  reading: 1
 };
 
 const lessonById = Object.fromEntries(lessons.map((lesson) => [lesson.id, lesson]));
 const tierById = Object.fromEntries(tiers.map((tier) => [tier.id, tier]));
 
 function App() {
-  const [screen, setScreen] = useState<Screen>("placement");
+  const [screen, setScreen] = useState<Screen>("welcome");
   const [completed, setCompleted] = useState<Set<string>>(new Set());
   const [activeLessonId, setActiveLessonId] = useState(lessons[0].id);
   const [activeTierId, setActiveTierId] = useState<1 | 2 | 3>(1);
   const [confidence, setConfidence] = useState(defaultConfidence);
   const [placementAnswers, setPlacementAnswers] = useState<Record<string, string>>({});
   const [placementResult, setPlacementResult] = useState<string>("");
+  const [placedTierId, setPlacedTierId] = useState<1 | 2 | 3>(1);
   const [projectCode, setProjectCode] = useState<Record<number, string>>({
     1: tiers[0].starterCode,
     2: tiers[1].starterCode,
@@ -514,7 +515,7 @@ function App() {
   const activeLesson = lessonById[activeLessonId] ?? lessons[0];
   const activeTier = tierById[activeTierId] ?? tiers[0];
 
-  const startAt = (tierId: 1 | 2 | 3) => {
+  const prepareStartingTier = (tierId: 1 | 2 | 3) => {
     const nextCompleted = new Set<string>();
     if (tierId >= 2) {
       lessons.filter((lesson) => lesson.tierId === 1).forEach((lesson) => nextCompleted.add(lesson.id));
@@ -528,17 +529,23 @@ function App() {
     const firstLesson = lessons.find((lesson) => lesson.tierId === tierId) ?? lessons[0];
     setActiveLessonId(firstLesson.id);
     setActiveTierId(tierId);
-    setScreen("skillTree");
+    setPlacedTierId(tierId);
+  };
+
+  const finishPlacement = (tierId: 1 | 2 | 3, result: string) => {
+    prepareStartingTier(tierId);
+    setPlacementResult(result);
+    setScreen("placementSummary");
   };
 
   const applyConfidencePlacement = () => {
     const average = (confidence.fundamentals + confidence.syntax + confidence.reading) / 3;
-    if (average >= 75 && confidence.reading >= 65) {
-      startAt(3);
-    } else if (average >= 50 && confidence.syntax >= 45) {
-      startAt(2);
+    if (average >= 2.5 && confidence.reading >= 2) {
+      finishPlacement(3, "Your confidence ratings place you at Tier 3 Advanced.");
+    } else if (average >= 1.75 && confidence.syntax >= 2) {
+      finishPlacement(2, "Your confidence ratings place you at Tier 2 Intermediate.");
     } else {
-      startAt(1);
+      finishPlacement(1, "Your confidence ratings place you at Tier 1 Novice.");
     }
   };
 
@@ -547,8 +554,7 @@ function App() {
       return sum + (placementAnswers[question.id] === question.answer ? 1 : 0);
     }, 0);
     const tierId: 1 | 2 | 3 = score >= 12 ? 3 : score >= 8 ? 2 : 1;
-    setPlacementResult(`Placement score: ${score}/15. Recommended start: Tier ${tierId} ${tierById[tierId].label}.`);
-    startAt(tierId);
+    finishPlacement(tierId, `Placement score: ${score}/15. Recommended start: Tier ${tierId} ${tierById[tierId].label}.`);
   };
 
   const openNode = (node: SequenceNode) => {
@@ -578,7 +584,7 @@ function App() {
   return (
     <div className="app-shell">
       <header className="topbar">
-        <button className="brand-button" onClick={() => setScreen("placement")} aria-label="Return to placement">
+        <button className="brand-button" onClick={() => setScreen("welcome")} aria-label="Return to welcome">
           <span className="brand-mark">HT</span>
           <span>
             <strong>HTML Tutor</strong>
@@ -586,6 +592,7 @@ function App() {
           </span>
         </button>
         <nav className="topnav" aria-label="Main screens">
+          <button className={screen === "welcome" ? "active" : ""} onClick={() => setScreen("welcome")}>Welcome</button>
           <button className={screen === "placement" ? "active" : ""} onClick={() => setScreen("placement")}>Placement</button>
           <button className={screen === "skillTree" ? "active" : ""} onClick={() => setScreen("skillTree")}>Skill Tree</button>
           <button className={screen === "lesson" ? "active" : ""} onClick={() => setScreen("lesson")}>Lesson</button>
@@ -594,6 +601,10 @@ function App() {
         </nav>
       </header>
 
+      {screen === "welcome" && (
+        <WelcomeScreen onNext={() => setScreen("placement")} />
+      )}
+
       {screen === "placement" && (
         <PlacementScreen
           confidence={confidence}
@@ -601,9 +612,18 @@ function App() {
           placementAnswers={placementAnswers}
           setPlacementAnswers={setPlacementAnswers}
           placementResult={placementResult}
-          onSelect={startAt}
           onConfidence={applyConfidencePlacement}
           onScoreQuiz={scorePlacementQuiz}
+        />
+      )}
+
+      {screen === "placementSummary" && (
+        <PlacementSummaryScreen
+          tier={tierById[placedTierId]}
+          lesson={lessonById[activeLessonId] ?? lessons[0]}
+          placementResult={placementResult}
+          onSkillTree={() => setScreen("skillTree")}
+          onStartLesson={() => setScreen("lesson")}
         />
       )}
 
@@ -631,13 +651,27 @@ function App() {
   );
 }
 
+function WelcomeScreen({ onNext }: { onNext: () => void }) {
+  return (
+    <main className="screen welcome-screen">
+      <section className="panel welcome-panel">
+        <p className="eyebrow">Welcome</p>
+        <h1>Welcome!</h1>
+        <p className="welcome-copy">
+          HTML Tutor is an Intelligent Tutoring System that teaches students beginner HTML! Let's get started with your confidence placement!
+        </p>
+        <button className="primary-action" onClick={onNext}>Next</button>
+      </section>
+    </main>
+  );
+}
+
 function PlacementScreen({
   confidence,
   setConfidence,
   placementAnswers,
   setPlacementAnswers,
   placementResult,
-  onSelect,
   onConfidence,
   onScoreQuiz
 }: {
@@ -646,54 +680,44 @@ function PlacementScreen({
   placementAnswers: Record<string, string>;
   setPlacementAnswers: (answers: Record<string, string>) => void;
   placementResult: string;
-  onSelect: (tierId: 1 | 2 | 3) => void;
   onConfidence: () => void;
   onScoreQuiz: () => void;
 }) {
   const [showExpertQuiz, setShowExpertQuiz] = useState(false);
 
   return (
-    <main className="screen two-column placement-grid">
-      <section className="panel intro-panel">
-        <p className="eyebrow">Screen 1</p>
-        <h1>Start with the right challenge level.</h1>
-        <p className="lede">
-          Choose a quick route into the tutor or rate your confidence across the major topic groups for a more precise starting model.
-        </p>
-        <div className="tier-picks">
-          {tiers.map((tier) => (
-            <button
-              key={tier.id}
-              className="tier-pick"
-              onClick={() => (tier.id === 3 ? setShowExpertQuiz(true) : onSelect(tier.id))}
-            >
-              <span>Tier {tier.id}</span>
-              <strong>{tier.label}</strong>
-              <small>{tier.title}</small>
-            </button>
-          ))}
+    <main className="screen placement-grid">
+      <section className="panel intro-panel placement-panel">
+        <div>
+          <p className="eyebrow">Confidence placement</p>
+          <h1>Tell HTML Tutor how confident you feel.</h1>
+          <p className="lede">
+            Move each slider to rank your current comfort level. HTML Tutor will use your ratings to recommend the best starting level.
+          </p>
         </div>
-      </section>
 
-      <section className="panel">
-        <p className="eyebrow">Confidence placement</p>
-        <h2>Rate each topic group</h2>
-        <Slider
-          label="HTML fundamentals"
-          value={confidence.fundamentals}
-          onChange={(value) => setConfidence({ ...confidence, fundamentals: value })}
-        />
-        <Slider
-          label="Syntax and structure"
-          value={confidence.syntax}
-          onChange={(value) => setConfidence({ ...confidence, syntax: value })}
-        />
-        <Slider
-          label="Reading, writing, Markdown"
-          value={confidence.reading}
-          onChange={(value) => setConfidence({ ...confidence, reading: value })}
-        />
-        <button className="primary-action" onClick={onConfidence}>Generate starting tier</button>
+        <div className="placement-controls">
+          <h2>Rate each topic group</h2>
+          <Slider
+            label="HTML fundamentals"
+            value={confidence.fundamentals}
+            onChange={(value) => setConfidence({ ...confidence, fundamentals: value })}
+          />
+          <Slider
+            label="Syntax and structure"
+            value={confidence.syntax}
+            onChange={(value) => setConfidence({ ...confidence, syntax: value })}
+          />
+          <Slider
+            label="Reading, writing, Markdown"
+            value={confidence.reading}
+            onChange={(value) => setConfidence({ ...confidence, reading: value })}
+          />
+          <div className="placement-actions">
+            <button className="primary-action" onClick={onConfidence}>Generate starting tier</button>
+            <button className="ghost-action" onClick={() => setShowExpertQuiz(true)}>Use detailed placement quiz</button>
+          </div>
+        </div>
       </section>
 
       {showExpertQuiz && (
@@ -729,6 +753,51 @@ function PlacementScreen({
   );
 }
 
+function PlacementSummaryScreen({
+  tier,
+  lesson,
+  placementResult,
+  onSkillTree,
+  onStartLesson
+}: {
+  tier: Tier;
+  lesson: Lesson;
+  placementResult: string;
+  onSkillTree: () => void;
+  onStartLesson: () => void;
+}) {
+  return (
+    <main className="screen placement-summary-screen">
+      <section className="panel placement-summary-panel">
+        <p className="eyebrow">Your starting level</p>
+        <h1>You'll start at Tier {tier.id}: {tier.label}</h1>
+        <p className="lede">{placementResult}</p>
+        <div className="summary-details">
+          <div>
+            <span>Focus area</span>
+            <strong>{tier.title}</strong>
+          </div>
+          <div>
+            <span>First lesson</span>
+            <strong>{lesson.title}</strong>
+          </div>
+          <div>
+            <span>Goal</span>
+            <strong>{tier.projectPrompt}</strong>
+          </div>
+        </div>
+        <p className="instruction-copy">
+          To start, open the skill tree and choose the first unlocked lesson. You can also jump straight into your first lesson now.
+        </p>
+        <div className="summary-actions">
+          <button className="primary-action" onClick={onSkillTree}>Start Skill Tree</button>
+          <button className="ghost-action" onClick={onStartLesson}>Start First Lesson</button>
+        </div>
+      </section>
+    </main>
+  );
+}
+
 function SkillTreeScreen({
   sequence,
   completed,
@@ -741,7 +810,6 @@ function SkillTreeScreen({
   return (
     <main className="screen skill-layout">
       <section className="panel skill-summary">
-        <p className="eyebrow">Screen 2</p>
         <h1>Skill Tree</h1>
         <p className="lede">A directed vertical progression. Complete each lesson quiz and tier project to unlock the next node.</p>
         <div className="state-legend">
@@ -815,7 +883,6 @@ function LessonScreen({ lesson, onQuiz }: { lesson: Lesson; onQuiz: () => void }
   return (
     <main className="screen lesson-screen">
       <section className="panel lesson-header">
-        <p className="eyebrow">Screen 3</p>
         <h1>{lesson.title}</h1>
         <p className="lede">{lesson.subtitle}</p>
         <div className="kc-row">{lesson.kcIds.map((kc) => <span className="kc-pill" key={kc}>{kc}</span>)}</div>
@@ -905,7 +972,6 @@ function QuizScreen({ lesson, onBack, onComplete }: { lesson: Lesson; onBack: ()
   return (
     <main className="screen quiz-screen">
       <section className="panel lesson-header">
-        <p className="eyebrow">Screen 4</p>
         <h1>{lesson.title} Mini Quiz</h1>
         <p className="lede">Questions mix conceptual checks, code prediction, and fill-in-the-blank syntax.</p>
       </section>
@@ -986,7 +1052,6 @@ function ProjectScreen({
   return (
     <main className="screen project-screen">
       <section className="panel lesson-header">
-        <p className="eyebrow">Screen 5</p>
         <h1>Tier {tier.id} Mini Project</h1>
         <p className="lede">{tier.projectPrompt}</p>
       </section>
@@ -1035,8 +1100,8 @@ function Slider({ label, value, onChange }: { label: string; value: number; onCh
   return (
     <label className="slider-row">
       <span>{label}</span>
-      <input type="range" min="0" max="100" value={value} onChange={(event) => onChange(Number(event.target.value))} />
-      <strong>{value}%</strong>
+      <input type="range" min="1" max="3" step="1" value={value} onChange={(event) => onChange(Number(event.target.value))} />
+      <strong>{value}/3</strong>
     </label>
   );
 }
