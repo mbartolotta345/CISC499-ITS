@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { type CSSProperties, useMemo, useState } from "react";
 
 type Screen = "welcome" | "placement" | "placementSummary" | "skillTree" | "lesson" | "quiz" | "project";
 type QuizKind = "multiple" | "prediction" | "fill";
@@ -655,7 +655,6 @@ function WelcomeScreen({ onNext }: { onNext: () => void }) {
   return (
     <main className="screen welcome-screen">
       <section className="panel welcome-panel">
-        <p className="eyebrow">Welcome</p>
         <h1>Welcome!</h1>
         <p className="welcome-copy">
           HTML Tutor is an Intelligent Tutoring System that teaches students beginner HTML! Let's get started with your confidence placement!
@@ -690,9 +689,9 @@ function PlacementScreen({
       <section className="panel intro-panel placement-panel">
         <div>
           <p className="eyebrow">Confidence placement</p>
-          <h1>Tell HTML Tutor how confident you feel.</h1>
+          <h1>How do you feel about HTML?</h1>
           <p className="lede">
-            Move each slider to rank your current comfort level. HTML Tutor will use your ratings to recommend the best starting level.
+            Move each slider to rank your current comfort level. 1 is the least confident and 3 is the most confident. HTML Tutor will use your ratings to recommend the best starting level.
           </p>
         </div>
 
@@ -714,7 +713,8 @@ function PlacementScreen({
             onChange={(value) => setConfidence({ ...confidence, reading: value })}
           />
           <div className="placement-actions">
-            <button className="primary-action" onClick={onConfidence}>Generate starting tier</button>
+            <button className="primary-action" onClick={onConfidence}>Submit</button>
+            <span className="choice-divider">or</span>
             <button className="ghost-action" onClick={() => setShowExpertQuiz(true)}>Use detailed placement quiz</button>
           </div>
         </div>
@@ -807,9 +807,20 @@ function SkillTreeScreen({
   completed: Set<string>;
   onOpen: (node: SequenceNode) => void;
 }) {
+  const completedCount = sequence.filter((node) => completed.has(node.id)).length;
+  const progressPercent = Math.round((completedCount / sequence.length) * 100);
+  const progressStyle = { "--progress-angle": `${progressPercent * 3.6}deg` } as CSSProperties & Record<string, string>;
+
   return (
     <main className="screen skill-layout">
       <section className="panel skill-summary">
+        <div
+          className="progress-ring"
+          style={progressStyle}
+          aria-label={`${progressPercent}% complete`}
+        >
+          <span>{progressPercent}%</span>
+        </div>
         <h1>Skill Tree</h1>
         <p className="lede">A directed vertical progression. Complete each lesson quiz and tier project to unlock the next node.</p>
         <div className="state-legend">
@@ -817,9 +828,9 @@ function SkillTreeScreen({
           <span><i className="dot unlocked-dot" />Unlocked</span>
           <span><i className="dot complete-dot" />Complete</span>
         </div>
-        <div className="kc-grid">
-          {kcs.map((kc) => (
-            <span key={kc.id} className={`kc-chip ${kc.category.toLowerCase()}`}>{kc.id}</span>
+        <div className="lesson-chip-grid">
+          {lessons.map((lesson, index) => (
+            <span key={lesson.id} className="lesson-chip">Lesson {index + 1}</span>
           ))}
         </div>
       </section>
@@ -839,7 +850,7 @@ function SkillTreeScreen({
               <span className="node-copy">
                 <small>Tier {tier.id} {tier.label}</small>
                 <strong>{node.type === "lesson" ? node.lesson.title : `${tier.label} Mini Project`}</strong>
-                <em>{node.type === "lesson" ? node.lesson.kcIds.join(", ") : tier.checks.join(", ")}</em>
+                <em>{node.type === "lesson" ? `Lesson ${lessons.findIndex((lesson) => lesson.id === node.lesson.id) + 1} of ${lessons.length}` : `Project ${tier.id}: ${tier.checks.join(", ")}`}</em>
               </span>
             </button>
           );

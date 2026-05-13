@@ -30,7 +30,7 @@ button {
   min-height: 100vh;
   background:
     linear-gradient(180deg, rgba(244, 246, 248, 0.94), rgba(244, 246, 248, 1)),
-    radial-gradient(circle at 8% 0%, rgba(244, 127, 59, 0.18), transparent 30%),
+    radial-gradient(circle at 8% 0%, rgba(28, 111, 232, 0.16), transparent 30%),
     radial-gradient(circle at 100% 12%, rgba(41, 132, 117, 0.16), transparent 28%);
 }
 
@@ -124,10 +124,49 @@ button {
 }
 
 .welcome-screen,
+.placement-grid,
 .placement-summary-screen {
   display: grid;
   min-height: calc(100vh - 74px);
   place-items: center;
+}
+
+.welcome-screen,
+.placement-grid {
+  position: relative;
+  width: 100%;
+  min-height: calc(100vh - 74px);
+  margin: 0;
+  padding-right: 16px;
+  padding-left: 16px;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.welcome-screen::before,
+.welcome-screen::after,
+.placement-grid::before,
+.placement-grid::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+}
+
+.welcome-screen::before,
+.placement-grid::before {
+  background: linear-gradient(120deg, #e3f5ff 0%, #8fc8ff 42%, #1c6fe8 74%, #094fbd 100%);
+  background-size: 220% 220%;
+  animation: welcomeGradientShift 12s ease-in-out infinite;
+}
+
+.welcome-screen::after,
+.placement-grid::after {
+  background:
+    repeating-radial-gradient(ellipse at 50% 140%, rgba(255, 255, 255, 0.36) 0 5px, transparent 6px 72px);
+  opacity: 0.55;
+  transform: translateY(-16px);
+  animation: welcomeWaveDrift 9s ease-in-out infinite alternate;
 }
 
 .panel {
@@ -144,7 +183,18 @@ button {
 
 .placement-panel {
   display: grid;
+  width: min(900px, 100%);
+  margin: 0 auto;
   gap: 22px;
+}
+
+.placement-panel h1 {
+  font-size: clamp(1.75rem, 3vw, 2.75rem);
+  white-space: nowrap;
+}
+
+.placement-panel .eyebrow {
+  color: #1c6fe8;
 }
 
 .placement-controls {
@@ -155,8 +205,25 @@ button {
 .placement-actions {
   display: flex;
   flex-wrap: wrap;
+  align-items: center;
   gap: 10px;
   margin-top: 18px;
+}
+
+.placement-actions .primary-action {
+  background: #1c6fe8;
+  color: #ffffff;
+  box-shadow: 0 8px 20px rgba(28, 111, 232, 0.28);
+}
+
+.choice-divider {
+  color: #516176;
+  font-weight: 800;
+}
+
+.quiz-placement {
+  width: min(1000px, 100%);
+  margin: 0 auto;
 }
 
 .welcome-panel,
@@ -171,6 +238,12 @@ button {
   color: #2f3f53;
   font-size: 1.4rem;
   line-height: 1.55;
+}
+
+.welcome-panel .primary-action {
+  background: #1c6fe8;
+  color: #ffffff;
+  box-shadow: 0 8px 20px rgba(28, 111, 232, 0.28);
 }
 
 .summary-details {
@@ -249,6 +322,7 @@ h2 {
 .prediction-options,
 .check-list,
 .kc-grid,
+.lesson-chip-grid,
 .kc-row,
 .state-legend,
 .tab-row,
@@ -269,7 +343,7 @@ h2 {
 }
 
 .tier-pick span {
-  color: #b45d2d;
+  color: #1c6fe8;
   font-size: 0.8rem;
   font-weight: 800;
 }
@@ -293,14 +367,18 @@ h2 {
   accent-color: #28796f;
 }
 
+.placement-panel .slider-row input {
+  accent-color: #1c6fe8;
+}
+
 .primary-action {
   border: 0;
   border-radius: 8px;
-  background: #f47f3b;
-  color: #161616;
+  background: #1c6fe8;
+  color: #ffffff;
   font-weight: 800;
   padding: 11px 16px;
-  box-shadow: 0 8px 20px rgba(244, 127, 59, 0.22);
+  box-shadow: 0 8px 20px rgba(28, 111, 232, 0.28);
 }
 
 .ghost-action {
@@ -345,16 +423,94 @@ h2 {
 }
 
 .skill-layout {
-  grid-template-columns: 360px minmax(0, 1fr);
-  align-items: start;
+  width: 100%;
+  min-height: calc(100vh - 73px);
+  grid-template-columns: 340px minmax(0, 1fr);
+  align-items: stretch;
+  gap: 28px;
+  padding-top: 0;
+  padding-bottom: 0;
+  padding-left: 0;
 }
 
 .skill-summary {
   position: sticky;
-  top: 96px;
+  top: 73px;
+  display: flex;
+  min-height: calc(100vh - 73px);
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  overflow: hidden;
+  isolation: isolate;
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+  border-color: rgba(255, 255, 255, 0.24);
+  background: transparent;
+  color: #ffffff;
+  padding: clamp(52px, 8vh, 86px) 24px 32px;
+  text-align: center;
+}
+
+.skill-summary::before,
+.skill-summary::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+}
+
+.skill-summary::before {
+  background: linear-gradient(120deg, #e3f5ff 0%, #8fc8ff 42%, #1c6fe8 74%, #094fbd 100%);
+  background-size: 220% 220%;
+  animation: welcomeGradientShift 12s ease-in-out infinite;
+}
+
+.skill-summary::after {
+  background:
+    repeating-radial-gradient(ellipse at 50% 140%, rgba(255, 255, 255, 0.36) 0 5px, transparent 6px 72px);
+  opacity: 0.48;
+  transform: translateY(-16px);
+  animation: welcomeWaveDrift 9s ease-in-out infinite alternate;
+}
+
+.skill-summary h1 {
+  font-size: clamp(2rem, 3vw, 2.8rem);
+}
+
+.skill-summary .lede {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.progress-ring {
+  --progress-angle: 0deg;
+  display: grid;
+  width: 178px;
+  height: 178px;
+  margin-bottom: 24px;
+  place-items: center;
+  border-radius: 50%;
+  background:
+    conic-gradient(from var(--ring-rotation, 0deg), #8fc8ff 0deg, #0b56c9 var(--progress-angle), rgba(255, 255, 255, 0.32) var(--progress-angle), rgba(255, 255, 255, 0.32) 360deg);
+  box-shadow: 0 18px 38px rgba(8, 51, 126, 0.26), inset 0 0 0 1px rgba(255, 255, 255, 0.3);
+  animation: ringProgressMotion 7s linear infinite;
+}
+
+.progress-ring span {
+  display: grid;
+  width: 124px;
+  height: 124px;
+  place-items: center;
+  border-radius: 50%;
+  background: #ffffff;
+  color: #1c6fe8;
+  font-size: 2rem;
+  font-weight: 900;
+  box-shadow: 0 10px 24px rgba(8, 51, 126, 0.18);
 }
 
 .state-legend {
+  justify-content: center;
   margin: 20px 0;
 }
 
@@ -362,7 +518,8 @@ h2 {
   display: inline-flex;
   align-items: center;
   gap: 7px;
-  color: #516176;
+  color: rgba(255, 255, 255, 0.92);
+  font-weight: 800;
 }
 
 .dot {
@@ -376,19 +533,22 @@ h2 {
 }
 
 .unlocked-dot {
-  background: #f1c94b;
+  background: #1c6fe8;
 }
 
 .complete-dot {
   background: #49a369;
 }
 
-.kc-grid {
+.kc-grid,
+.lesson-chip-grid {
+  justify-content: center;
   gap: 8px;
 }
 
 .kc-chip,
-.kc-pill {
+.kc-pill,
+.lesson-chip {
   border-radius: 999px;
   padding: 7px 10px;
   background: #eaf0f6;
@@ -397,9 +557,14 @@ h2 {
   font-weight: 800;
 }
 
+.lesson-chip {
+  background: rgba(255, 255, 255, 0.88);
+  color: #0f57c8;
+}
+
 .kc-chip.procedural {
-  background: #fff1df;
-  color: #9a5326;
+  background: #e8f1ff;
+  color: #175bc2;
 }
 
 .kc-chip.conditional {
@@ -411,7 +576,10 @@ h2 {
   position: relative;
   display: grid;
   gap: 18px;
+  padding-top: 32px;
   padding-left: 24px;
+  padding-right: 28px;
+  padding-bottom: 54px;
 }
 
 .skill-tree::before {
@@ -445,8 +613,8 @@ h2 {
 }
 
 .tree-node.unlocked {
-  border-color: #f1c94b;
-  background: #fff7d5;
+  border-color: #1c6fe8;
+  background: #e8f1ff;
 }
 
 .tree-node.complete {
@@ -619,9 +787,9 @@ h2 {
 }
 
 .hint-box {
-  border-left: 4px solid #f1c94b;
+  border-left: 4px solid #1c6fe8;
   border-radius: 8px;
-  background: #fff9df;
+  background: #e8f1ff;
   padding: 14px;
 }
 
@@ -670,6 +838,48 @@ textarea {
   line-height: 1.5;
 }
 
+@property --ring-rotation {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 0deg;
+}
+
+@keyframes welcomeGradientShift {
+  0% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
+
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+@keyframes welcomeWaveDrift {
+  from {
+    background-position: 0 0;
+    transform: translateY(-16px) scale(1.03);
+  }
+
+  to {
+    background-position: 96px 28px;
+    transform: translateY(12px) scale(1.08);
+  }
+}
+
+@keyframes ringProgressMotion {
+  from {
+    --ring-rotation: 0deg;
+  }
+
+  to {
+    --ring-rotation: 360deg;
+  }
+}
+
 .check-list span {
   border: 1px solid #cbd5e1;
   border-radius: 999px;
@@ -713,6 +923,8 @@ textarea {
 
   .skill-summary {
     position: static;
+    min-height: auto;
+    border-radius: 8px;
   }
 
   .placement-question,
@@ -745,6 +957,15 @@ textarea {
   .ghost-action,
   .primary-action {
     width: 100%;
+  }
+
+  .placement-panel h1 {
+    font-size: 1.35rem;
+  }
+
+  .choice-divider {
+    width: 100%;
+    text-align: center;
   }
 
   .tree-node {
