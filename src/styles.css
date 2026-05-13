@@ -132,7 +132,8 @@ button {
 }
 
 .welcome-screen,
-.placement-grid {
+.placement-grid,
+.placement-summary-screen {
   position: relative;
   width: 100%;
   min-height: calc(100vh - 74px);
@@ -146,7 +147,9 @@ button {
 .welcome-screen::before,
 .welcome-screen::after,
 .placement-grid::before,
-.placement-grid::after {
+.placement-grid::after,
+.placement-summary-screen::before,
+.placement-summary-screen::after {
   content: "";
   position: absolute;
   inset: 0;
@@ -154,14 +157,16 @@ button {
 }
 
 .welcome-screen::before,
-.placement-grid::before {
+.placement-grid::before,
+.placement-summary-screen::before {
   background: linear-gradient(120deg, #e3f5ff 0%, #8fc8ff 42%, #1c6fe8 74%, #094fbd 100%);
   background-size: 220% 220%;
   animation: welcomeGradientShift 12s ease-in-out infinite;
 }
 
 .welcome-screen::after,
-.placement-grid::after {
+.placement-grid::after,
+.placement-summary-screen::after {
   background:
     repeating-radial-gradient(ellipse at 50% 140%, rgba(255, 255, 255, 0.36) 0 5px, transparent 6px 72px);
   opacity: 0.55;
@@ -234,6 +239,10 @@ button {
   padding: 36px;
 }
 
+.placement-summary-panel .eyebrow {
+  color: #1c6fe8;
+}
+
 .welcome-copy {
   color: #2f3f53;
   font-size: 1.4rem;
@@ -286,7 +295,7 @@ button {
 
 .eyebrow {
   margin: 0 0 8px;
-  color: #28796f;
+  color: #1c6fe8;
   font-size: 0.76rem;
   font-weight: 800;
   letter-spacing: 0;
@@ -364,7 +373,7 @@ h2 {
 }
 
 .slider-row input {
-  accent-color: #28796f;
+  accent-color: #1c6fe8;
 }
 
 .placement-panel .slider-row input {
@@ -537,7 +546,7 @@ h2 {
 }
 
 .complete-dot {
-  background: #49a369;
+  background: #0f57c8;
 }
 
 .kc-grid,
@@ -580,8 +589,8 @@ h2 {
 }
 
 .kc-chip.conditional {
-  background: #e5f3f0;
-  color: #1f756a;
+  background: #eef5ff;
+  color: #0f57c8;
 }
 
 .skill-tree {
@@ -630,8 +639,8 @@ h2 {
 }
 
 .tree-node.complete {
-  border-color: #49a369;
-  background: #e6f5eb;
+  border-color: #0f57c8;
+  background: #dcecff;
 }
 
 .node-index {
@@ -818,7 +827,7 @@ h2 {
 }
 
 .success-line {
-  color: #247643;
+  color: #0f57c8;
   font-weight: 800;
 }
 
@@ -902,9 +911,9 @@ textarea {
 }
 
 .check-list .check-pass {
-  border-color: #49a369;
-  background: #e6f5eb;
-  color: #247643;
+  border-color: #0f57c8;
+  background: #dcecff;
+  color: #0f57c8;
 }
 
 .check-list .check-fail {
