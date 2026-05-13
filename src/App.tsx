@@ -885,6 +885,8 @@ function LessonScreen({ lesson, onQuiz }: { lesson: Lesson; onQuiz: () => void }
   const [dragIndex, setDragIndex] = useState<number | null>(null);
   const [assemblyFeedback, setAssemblyFeedback] = useState("");
   const variant = lesson.variants[variantIndex] ?? lesson.variants[0];
+  const lessonNumber = lessons.findIndex((item) => item.id === lesson.id) + 1;
+  const tier = tierById[lesson.tierId];
 
   const resetAssembly = () => {
     setAssemblyTokens(lesson.assembly?.tokens ?? []);
@@ -915,7 +917,10 @@ function LessonScreen({ lesson, onQuiz }: { lesson: Lesson; onQuiz: () => void }
       <section className="panel lesson-header">
         <h1>{lesson.title}</h1>
         <p className="lede">{lesson.subtitle}</p>
-        <div className="kc-row">{lesson.kcIds.map((kc) => <span className="kc-pill" key={kc}>{kc}</span>)}</div>
+        <div className="kc-row">
+          <span className="kc-pill">Lesson {lessonNumber} of {lessons.length}</span>
+          <span className="kc-pill">Tier {tier.id}: {tier.title}</span>
+        </div>
       </section>
 
       <section className="panel variant-lab">
