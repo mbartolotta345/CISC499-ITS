@@ -251,12 +251,6 @@ button {
   line-height: 1.55;
 }
 
-.welcome-panel .primary-action {
-  background: #1c6fe8;
-  color: #ffffff;
-  box-shadow: 0 8px 20px rgba(28, 111, 232, 0.28);
-}
-
 .summary-details {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -383,6 +377,8 @@ h2 {
 }
 
 .primary-action {
+  position: relative;
+  overflow: hidden;
   border: 0;
   border-radius: 8px;
   background: #1c6fe8;
@@ -390,6 +386,33 @@ h2 {
   font-weight: 800;
   padding: 11px 16px;
   box-shadow: 0 8px 20px rgba(28, 111, 232, 0.28);
+  transition: transform 180ms ease, box-shadow 180ms ease, background 180ms ease;
+}
+
+.primary-action::after {
+  content: "";
+  position: absolute;
+  top: -60%;
+  bottom: -60%;
+  left: -45%;
+  width: 36%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.45), transparent);
+  transform: translateX(-120%) rotate(18deg);
+}
+
+.primary-action:hover {
+  background: #0f57c8;
+  box-shadow: 0 14px 28px rgba(28, 111, 232, 0.34);
+  transform: translateY(-2px);
+}
+
+.primary-action:hover::after {
+  animation: buttonSheen 720ms ease;
+}
+
+.primary-action:active {
+  box-shadow: 0 8px 18px rgba(28, 111, 232, 0.28);
+  transform: translateY(0) scale(0.98);
 }
 
 .ghost-action {
@@ -910,6 +933,16 @@ textarea {
 
   to {
     --ring-rotation: 360deg;
+  }
+}
+
+@keyframes buttonSheen {
+  from {
+    transform: translateX(-120%) rotate(18deg);
+  }
+
+  to {
+    transform: translateX(520%) rotate(18deg);
   }
 }
 
